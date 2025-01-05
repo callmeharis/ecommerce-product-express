@@ -29,6 +29,14 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required field"],
     minLength: [8, "Password cannot be less than 8 characters"],
   },
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordTokenExpiry: {
+    type: Date,
+    default: null,
+  },
 });
 
 const User = mongoose.model("User", userSchema);
