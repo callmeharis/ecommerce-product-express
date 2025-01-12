@@ -8,7 +8,9 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.send("Email already in user, please use another email");
+      return res.status(400).json({
+        msg: "Email already in use, please use another email",
+      });
     }
     const register = await User.create({
       firstName: firstName,
@@ -32,7 +34,10 @@ const registerUser = async (req, res) => {
       msg: "User registered successfully",
     });
   } catch (error) {
-    res.send(error);
+    res.status(500).json({
+      msg: "Internal Server Error",
+      error,
+    });
   }
 };
 const loginUser = async (req, res) => {
@@ -163,7 +168,7 @@ const sendResetPasswordEmail = async (email, resetToken) => {
         pass: process.env.SMTP_PASSWORD,
       },
     });
-    const resetLink = `http://localhost:3000/auth/reset-password/${resetToken}`;
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
     const mailOptions = {
       from: process.env.SMTP_EMAIL,
       to: email,
