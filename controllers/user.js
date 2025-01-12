@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const { StatusCodes } = require("http-status-codes");
 const registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, username, password } = req.body;
@@ -28,13 +29,13 @@ const registerUser = async (req, res) => {
       process.env.JWT_SECRET
     );
     // res.send(register);
-    res.status(201).json({
+    res.status(StatusCodes.CREATED).json({
       register,
       token,
       msg: "User registered successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       msg: "Internal Server Error",
       error,
     });
@@ -45,7 +46,7 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      return res.status(404).json({
+      return res.status(StatusCodes.NOT_FOUND).json({
         msg: "user not found, please create account first",
       });
     }
@@ -54,7 +55,7 @@ const loginUser = async (req, res) => {
       existingUser.password
     );
     if (!isMatchedPassword) {
-      return res.status(400).json({
+      return res.status(StatusCodes.BAD_REQUEST).json({
         msg: "Invalid email or password",
       });
     }
@@ -65,12 +66,12 @@ const loginUser = async (req, res) => {
       },
       process.env.JWT_SECRET
     );
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       msg: "user logged in successfully",
       token,
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       msg: "Internal server error",
       error,
     });
@@ -82,7 +83,7 @@ const forgetPassword = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({
+      return res.status(StatusCodes.NOT_FOUND).json({
         msg: "user not found, please create account",
       });
     }
@@ -96,7 +97,7 @@ const forgetPassword = async (req, res) => {
     await user.save();
 
     await sendResetPasswordEmail(email, resetToken);
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       msg: "Reset Password link has been sent to your email",
     });
   } catch (error) {
@@ -115,7 +116,7 @@ const resetPassword = async (req, res) => {
       resetPasswordTokenExpiry: { $gt: Date.now() },
     });
     if (!user) {
-      return res.status(404).json({
+      return res.status(StatusCodes.NOT_FOUND).json({
         msg: "Invalid or expired token",
       });
     }
@@ -146,11 +147,11 @@ const resetPassword = async (req, res) => {
     await transporter.sendMail(mailOptions);
     console.log("password reset token success");
 
-    res.status(200).json({
+    res.status(StatusCodes.OK).json({
       msg: "Your password has been reset successfully, please login with new password",
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       msg: "Something went wrong",
       error,
     });
