@@ -2,7 +2,8 @@ const { StatusCodes } = require("http-status-codes");
 const Product = require("../models/Product");
 const getProducts = async (req, res) => {
   try {
-    const data = await Product.find({});
+    console.log("req.user in controllers", req.user.userId);
+    const data = await Product.find({ createdBy: req.user.userId });
     res.status(StatusCodes.OK).json({
       success: true,
       data,
@@ -15,26 +16,15 @@ const getProducts = async (req, res) => {
   }
 };
 const createProduct = async (req, res) => {
-  const { title, desc, price, productImage, reviews } = req.body;
+  req.body.createdBy = req.user.userId;
+  // const { title, desc, price, productImage, reviews } = req.body;
 
   try {
-    const data = await Product.create({
-      title,
-      desc,
-      price,
-      productImage,
-      reviews,
-    });
+    const data = await Product.create(req.body);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      product: {
-        title,
-        desc,
-        price,
-        productImage,
-        reviews,
-      },
+      data,
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

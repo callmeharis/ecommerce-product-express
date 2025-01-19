@@ -6,13 +6,14 @@ const productRouter = require("./routes/product");
 const app = express();
 const port = process.env.PORT || 8000;
 const cors = require("cors");
+const auth = require("./middleware/auth");
 
 connectDB();
 
 app.use(cors());
 app.use(express.json());
 app.use("/", router);
-app.use("/products", productRouter);
+app.use("/products", auth, productRouter);
 
 app.get("/", (req, res) => {
   res.send("APIs Working");

@@ -20,6 +20,11 @@ const productSchema = new mongoose.Schema({
     type: String,
   },
   reviews: [{ type: String }],
+  createdBy: {
+    type: mongoose.Types.ObjectId,
+    ref: "User",
+    required: [true, "please provide user"],
+  },
 });
 
 module.exports = mongoose.model("Product", productSchema);
